@@ -1,1 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Da mesma forma.</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'charcoal': '#111111',
+                        'cream': '#F3EBDD',
+                        'wine': '#8D3148',
+                        'moss': '#6E7A5C',
+                        'paper-shadow': 'rgba(0,0,0,0.15)'
+                    },
+                    fontFamily: {
+                        'serif': ['"Cormorant Garamond"', 'serif'],
+                        'sans': ['Inter', 'sans-serif'],
+                        'hand': ['Caveat', 'cursive'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
 
+    <style>
+        body {
+            background-color: #F3EBDD;
+            color: #111111;
+            overflow-x: hidden;
+        }
+        
+        /* Textura global para dar aspecto de papel/filme */
+        .texture-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.8;
+            mix-blend-mode: multiply;
+        }
+
+        /* Estilos de Polaroid */
+        .polaroid {
+            background: white;
+            padding: 12px 12px 40px 12px;
+            box-shadow: 2px 4px 15px rgba(0,0,0,0.1), 0 0 40px rgba(0,0,0,0.05) inset;
+            position: relative;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        .polaroid:hover {
+            transform: scale(1.02) rotate(0deg) !important;
+            z-index: 20;
+        }
+        .polaroid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) sepia(0.1); /* Toque de foto antiga/flash */
+        }
+        .polaroid-caption {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            color: #111111;
+        }
+
+        /* Fita Adesiva (Tape) */
+        .tape {
+            position: absolute;
+            background-color: rgba(243, 235, 221, 0.6);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            backdrop-filter: blur(2px);
+            z-index: 10;
+        }
+        .tape-top-center { width: 80px; height: 25px; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg); }
+        .tape-top-left { width: 70px; height: 20px; top: -5px; left: -15px; transform: rotate(-45deg); }
+        .tape-top-right { width: 70px; height: 20px; top: -5px; right: -15px; transform: rotate(45deg); }
+
+        /* Doodles e anotações */
+        .doodle-circle {
+            position: absolute;
+            border: 2px solid #8D3148;
+            border-radius: 50%;
+            border-style: dashed;
+            pointer-events: none;
+        }
+        
+        .torn-edge-top {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: #111111;
+            clip-path: polygon(0% 50%, 5% 0%, 10% 50%, 15% 0%, 20% 50%, 25% 0%, 30% 50%, 35% 0%, 40% 50%, 45% 0%, 50% 50%, 55% 0%, 60% 50%, 65% 0%, 70% 50%, 75% 0%, 80% 50%, 85% 0%, 90% 50%, 95% 0%, 100% 50%, 100% 100%, 0% 100%);
+        }
+        .torn-edge-bottom {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: #111111;
+            clip-path: polygon(0% 50%, 5% 100%, 10% 50%, 15% 100%, 20% 50%, 25% 100%, 30% 50%, 35% 100%, 40% 50%, 45% 100%, 50% 50%, 55% 100%, 60% 50%, 65% 100%, 70% 50%, 75% 100%, 80% 50%, 85% 100%, 90% 50%, 95% 100%, 100% 50%, 100% 0%, 0% 0%);
+        }
+
+        /* Utilizando a imagem fornecida como base para cortes */
+        .img-source {
+            background-image: url('ChatGPT Image 31 de mai. de 2026, 00_06_30.png');
+            background-size: 300%; /* Aumenta para permitir cortes menores */
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-cream relative">
+
+    <!-- Textura de ruído sobre toda a página -->
+    <div class="texture-overlay bg-noise"></div>
+
+    <!-- CAPA -->
+    <header class="relative min-h-screen flex flex-col md:flex-row items-center justify-center p-6 md:p-16 overflow-hidden">
+        <!-- Fundo dividido -->
+        <div class="absolute inset-0 flex flex-col md:flex-row">
+            <div class="w-full md:w-5/12 h-1/2 md:h-full bg-charcoal relative">
+                 <!-- Borda rasgada direita no desktop, baixo no mobile -->
+                 <div class="hidden md:block absolute right-0 top-0 w-4 h-full bg-cream" style="clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 50% 95%, 0% 90%, 50% 85%, 0% 80%, 50% 75%, 0% 70%, 50% 65%, 0% 60%, 50% 55%, 0% 50%, 50% 45%, 0% 40%, 50% 35%, 0% 30%, 50% 25%, 0% 20%, 50% 15%, 0% 10%, 50% 5%); transform: translateX(50%); z-index: 2;"></div>
+            </div>
+            <div class="w-full md:w-7/12 h-1/2 md:h-full bg-cream"></div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+            
+            <!-- Texto da Capa (Lado Escuro) -->
+            <div class="w-full md:w-1/2 text-cream px-4 md:pr-12 pt-12 md:pt-0">
+                <h1 class="font-serif text-6xl md:text-8xl leading-none mb-4">
+                    Feliz<br>aniversário,<br>
+                    <span class="text-wine italic pr-4">amor.</span>
+                    <span class="font-hand text-wine text-4xl inline-block -ml-2 -mt-4 absolute">♡</span>
+                </h1>
+                
+                <div class="relative inline-block mt-4 mb-8">
+                    <p class="font-hand text-2xl md:text-3xl text-cream/90 rotate-[-2deg]">
+                        É o seu segundo aniversário<br>comigo, nhenhenhe. <span class="text-wine">♡</span>
+                    </p>
+                    <div class="absolute -inset-2 border border-cream/20 rounded-sm pointer-events-none" style="transform: rotate(-1deg);"></div>
+                </div>
+
+                <div class="relative mt-8 max-w-sm">
+                    <p class="font-sans text-sm md:text-base text-cream/80 leading-relaxed font-light">
+                        Eu queria que você soubesse que toda vez que eu vejo você chegando, meu coração acelera exatamente <span class="relative inline-block text-cream font-medium z-10">da mesma forma.<span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[150%] border border-wine/70 rounded-[50%] -rotate-2 pointer-events-none"></span></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Foto Principal (Lado Claro) -->
+            <div class="w-full md:w-1/2 flex justify-center relative mt-12 md:mt-0">
+                <!-- Doodles -->
+                <div class="absolute top-0 right-10 md:-right-4 text-wine font-hand text-3xl rotate-[15deg]">
+                    ♡ <br> <span class="text-xl ml-4">♡</span>
+                </div>
+                <div class="absolute top-20 right-0 md:-right-16 text-moss font-hand text-2xl rotate-[5deg] max-w-[120px]">
+                    você é tão meu amor.
+                </div>
+                <div class="absolute bottom-10 -right-4 md:-right-20 bg-wine/90 p-4 shadow-lg rotate-[-8deg] z-20">
+                    <p class="font-hand text-cream text-2xl leading-tight">
+                        you make<br>me lose<br>my cool.<br>
+                        <span class="text-center block text-lg mt-1">♡</span>
+                    </p>
+                </div>
+
+                <!-- Imagem grande -->
+                <div class="polaroid rotate-[3deg] w-[90%] md:w-[450px] aspect-[4/5] bg-white p-3 pb-4 relative z-10">
+                    <div class="tape tape-top-center"></div>
+                    <div class="w-full h-full overflow-hidden bg-gray-200">
+                        <!-- Usando a imagem fornecida focando nos rostos do topo -->
+                        <div class="img-source" style="background-position: 50% 10%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 01 O COMEÇO -->
+    <section class="py-20 px-6 md:px-16 relative z-10 max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center gap-12">
+            
+            <div class="w-full md:w-1/3 relative">
+                <div class="flex items-baseline gap-4 mb-4">
+                    <h2 class="font-serif text-7xl md:text-8xl text-wine opacity-80">01</h2>
+                    <span class="font-hand text-4xl text-charcoal rotate-[-10deg]">☆</span>
+                </div>
+                <h3 class="font-serif text-4xl md:text-5xl text-charcoal mb-6 border-b border-charcoal/20 pb-4">o começo</h3>
+                <p class="font-sans text-charcoal/80 max-w-xs text-lg">
+                    De um jeito tímido,<br>bagunçado e<br>totalmente nosso.
+                </p>
+                <div class="font-hand text-wine text-5xl mt-6 ml-10 rotate-[-15deg]">♡</div>
+            </div>
+
+            <div class="w-full md:w-2/3 flex justify-center md:justify-end gap-4 md:gap-8 flex-wrap relative">
+                
+                <div class="polaroid rotate-[-4deg] w-[200px] md:w-[240px] aspect-[3/4] z-10 mt-10">
+                    <div class="tape tape-top-left"></div>
+                    <div class="w-full h-[calc(100%-20px)] overflow-hidden">
+                        <!-- Corte 2 -->
+                        <div class="img-source" style="background-position: 20% 40%; background-size: 350%;"></div>
+                    </div>
+                </div>
+
+                <div class="polaroid rotate-[6deg] w-[180px] md:w-[220px] aspect-[3/4] z-20 -ml-10 md:ml-0 -mt-5">
+                    <div class="tape tape-top-center"></div>
+                    <div class="w-full h-[calc(100%-20px)] overflow-hidden">
+                        <!-- Corte 3 -->
+                        <div class="img-source" style="background-position: 80% 40%; background-size: 350%;"></div>
+                    </div>
+                    <div class="polaroid-caption">primeiros nós. ♡</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 02 DA MESMA FORMA -->
+    <section class="py-24 relative bg-charcoal text-cream mt-10">
+        <!-- Bordas rasgadas -->
+        <div class="torn-edge-top"></div>
+        <div class="torn-edge-bottom"></div>
+
+        <div class="max-w-6xl mx-auto px-6 md:px-16 relative z-10 flex flex-col lg:flex-row gap-16">
+            
+            <div class="w-full lg:w-5/12">
+                <div class="flex items-center gap-4 mb-2">
+                    <h2 class="font-serif text-7xl md:text-8xl text-wine opacity-90">02</h2>
+                    <div class="relative">
+                        <span class="font-hand text-5xl text-cream rotate-[15deg] inline-block">☆</span>
+                        <span class="absolute top-1/2 left-full font-hand text-2xl -translate-y-1/2 ml-2">↗</span>
+                    </div>
+                </div>
+                <h3 class="font-serif text-4xl md:text-5xl text-cream mb-10 border-b border-cream/20 pb-4">da mesma<br>forma</h3>
+                
+                <div class="space-y-8 font-sans text-sm md:text-base text-cream/80 font-light max-w-sm">
+                    <p>
+                        Da mesma forma de quando você pegava na minha nuca enquanto eu desabava no seu <span class="relative inline-block text-cream font-medium z-10">colo.<span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[140%] border border-wine/70 rounded-[50%] rotate-3 pointer-events-none"></span></span>
+                    </p>
+                    <p>
+                        Da mesma forma de quando eu ria meio embriagado nos seus braços.
+                    </p>
+                    <p>
+                        Da mesma forma de quando eu sentia sua boca molhada no banho <span class="relative inline-block text-cream font-medium z-10">tímido.<span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[130%] border border-cream/40 rounded-[50%] -rotate-2 pointer-events-none"></span></span>
+                    </p>
+                    <p>
+                        Da mesma forma de quando senti minhas mãos na sua cintura no <span class="relative inline-block text-cream font-medium z-10">primeiro show<span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[105%] h-[130%] border border-wine/70 rounded-[50%] rotate-1 pointer-events-none"></span></span> da minha vida, numa cidade enorme e tão longe de casa.
+                    </p>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-7/12 relative min-h-[500px]">
+                <!-- Grid de polaroids caótico -->
+                <div class="absolute top-0 right-4 md:right-10 polaroid rotate-[5deg] w-[200px] z-10">
+                    <div class="tape tape-top-right"></div>
+                    <div class="w-full aspect-square overflow-hidden">
+                        <!-- Corte 4 -->
+                        <div class="img-source" style="background-position: 85% 15%; background-size: 250%;"></div>
+                    </div>
+                    <div class="polaroid-caption text-xl">meu colo. ♡</div>
+                </div>
+
+                <div class="absolute top-[180px] left-0 md:left-[10%] polaroid rotate-[-8deg] w-[220px] z-20">
+                    <div class="tape tape-top-left"></div>
+                    <div class="w-full aspect-[4/3] overflow-hidden">
+                        <!-- Corte 5 -->
+                        <div class="img-source" style="background-position: 15% 65%; background-size: 250%;"></div>
+                    </div>
+                    <div class="polaroid-caption text-xl">primeiro show.</div>
+                </div>
+
+                <div class="absolute top-[280px] right-0 md:right-[20%] polaroid rotate-[12deg] w-[240px] z-30">
+                    <div class="tape tape-top-center"></div>
+                    <div class="w-full aspect-video overflow-hidden">
+                        <!-- Corte 6 -->
+                        <div class="img-source" style="background-position: 80% 80%; background-size: 200%;"></div>
+                    </div>
+                    <div class="polaroid-caption text-xl">da mesma forma. ♡</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 03 AS PEQUENAS COISAS -->
+    <section class="py-24 px-6 md:px-16 max-w-6xl mx-auto relative z-10">
+        <div class="flex flex-col lg:flex-row gap-12">
+            
+            <div class="w-full lg:w-1/3">
+                <div class="flex items-center gap-4 mb-2">
+                    <h2 class="font-serif text-7xl md:text-8xl text-wine opacity-80">03</h2>
+                    <span class="font-hand text-4xl text-moss rotate-[20deg]">☆</span>
+                </div>
+                <h3 class="font-serif text-4xl md:text-5xl text-charcoal mb-6">as pequenas<br>coisas</h3>
+                <div class="font-hand text-wine text-4xl mb-4 ml-8 rotate-[-10deg]">♡</div>
+                
+                <p class="font-sans text-charcoal/80 text-sm md:text-base max-w-xs mb-10">
+                    Café superfaturado,<br>jogos até tarde,<br>reclamações bobas,<br>descobertas incríveis e<br>muitas risadas.
+                </p>
+
+                <div class="relative inline-block mb-12">
+                    <span class="font-hand text-4xl text-wine rotate-[-5deg] inline-block">fofo e AAAAAA.</span>
+                    <span class="absolute -right-8 bottom-0 font-hand text-3xl">→</span>
+                </div>
+
+                <div class="mt-auto font-hand text-3xl text-charcoal max-w-[200px] leading-tight relative">
+                    a pessoa que<br>mais me faz rir.
+                    <span class="absolute -right-6 bottom-0 text-wine rotate-[15deg]">♡</span>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-2/3 flex flex-wrap gap-6 justify-center lg:justify-start items-start relative">
+                
+                <!-- Seta conectando seções visualmente -->
+                <div class="hidden lg:block absolute -left-16 top-10 font-hand text-5xl text-moss rotate-[120deg]">↗</div>
+
+                <div class="polaroid rotate-[-6deg] w-[260px] md:w-[300px] z-20 mt-4 lg:mt-0">
+                    <div class="tape tape-top-center"></div>
+                    <div class="w-full aspect-[4/3] overflow-hidden">
+                        <!-- Corte 7 -->
+                        <div class="img-source" style="background-position: 25% 65%; background-size: 200%;"></div>
+                    </div>
+                    <div class="polaroid-caption">café superfaturado. ♡</div>
+                </div>
+
+                <div class="flex flex-col gap-6 w-full md:w-auto items-center mt-8 lg:mt-32">
+                    <div class="polaroid rotate-[4deg] w-[220px] z-10">
+                        <div class="tape tape-top-right"></div>
+                        <div class="w-full aspect-[4/5] overflow-hidden">
+                            <!-- Corte 8 -->
+                            <div class="img-source" style="background-position: 30% 90%; background-size: 250%;"></div>
+                        </div>
+                        <div class="polaroid-caption text-xl">jogos e nós. ♡</div>
+                    </div>
+                </div>
+
+                <div class="polaroid rotate-[-2deg] w-[220px] z-30 lg:absolute lg:bottom-10 lg:right-10">
+                    <div class="tape tape-top-left"></div>
+                    <div class="w-full aspect-[4/5] overflow-hidden">
+                        <!-- Corte 9 -->
+                        <div class="img-source" style="background-position: 70% 90%; background-size: 250%;"></div>
+                    </div>
+                    <div class="polaroid-caption text-xl">piadas internas. ♡</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 04 O FUTURO -->
+    <section class="py-20 px-6 md:px-16 max-w-6xl mx-auto relative z-10 border-t border-charcoal/10">
+        <div class="flex flex-col lg:flex-row items-center gap-16">
+            
+            <div class="w-full lg:w-5/12">
+                <div class="flex items-center gap-4 mb-2">
+                    <h2 class="font-serif text-7xl md:text-8xl text-wine opacity-80">04</h2>
+                    <span class="font-hand text-4xl text-charcoal rotate-[10deg]">♡</span>
+                </div>
+                <h3 class="font-serif text-4xl md:text-5xl text-charcoal mb-6">o futuro</h3>
+                
+                <p class="font-sans text-charcoal/80 text-base mb-10 leading-relaxed">
+                    Obrigado por todos os momentos que já vivemos e por todos os que <span class="relative inline-block font-medium z-10">ainda<span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[140%] border border-wine/70 rounded-[50%] -rotate-3 pointer-events-none"></span></span> vamos viver.
+                </p>
+
+                <div class="bg-white/50 p-6 shadow-sm border border-charcoal/5 relative rotate-[-1deg]">
+                    <div class="tape tape-top-left"></div>
+                    <ul class="font-sans text-charcoal/80 space-y-3">
+                        <li class="flex items-center gap-3"><span class="text-wine text-xs">♥</span> jogar com você</li>
+                        <li class="flex items-center gap-3"><span class="text-wine text-xs">♥</span> beber café com você</li>
+                        <li class="flex items-center gap-3"><span class="text-wine text-xs">♥</span> reclamar das coisas com você</li>
+                        <li class="flex items-center gap-3"><span class="text-wine text-xs">♥</span> descobrir lugares novos com você</li>
+                        <li class="flex items-center gap-3"><span class="text-wine text-xs">♥</span> e me perder em você. <span class="font-hand text-xl ml-2 rotate-[15deg]">♡</span></li>
+                    </ul>
+                </div>
+
+                <div class="mt-8 font-hand text-2xl text-charcoal rotate-[2deg] ml-4">
+                    eu quero passar o resto<br>da minha vida com você.<br>
+                    <span class="block text-center mt-1 text-wine">♡</span>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-7/12 flex justify-center">
+                <div class="polaroid rotate-[3deg] w-full max-w-[450px] z-20 relative">
+                    <div class="tape tape-top-center"></div>
+                    <!-- Flor decorativa seca (simulada) -->
+                    <div class="absolute -right-12 bottom-20 font-hand text-moss text-6xl rotate-[45deg] opacity-70 pointer-events-none">
+                        *
+                    </div>
+                    <div class="w-full aspect-[4/3] overflow-hidden">
+                        <!-- Corte 10 (Usando uma visao mais ampla se possivel, simulando externa) -->
+                        <div class="img-source" style="background-position: 75% 65%; background-size: 180%;"></div>
+                    </div>
+                    <div class="polaroid-caption">meu lugar favorito. ♡</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 05 FINAL -->
+    <section class="min-h-screen bg-charcoal text-cream flex flex-col relative overflow-hidden">
+        <!-- Borda superior rasgada preta sobre fundo creme que sobrou -->
+        <div class="torn-edge-top z-10"></div>
+        
+        <div class="flex-grow flex flex-col justify-center items-center relative z-20 px-6 py-20">
+            
+            <div class="absolute top-16 left-6 md:left-16">
+                <h2 class="font-serif text-6xl md:text-7xl text-wine opacity-90 mb-2">05</h2>
+                <h3 class="font-serif text-3xl md:text-4xl">final</h3>
+                <div class="font-hand text-3xl text-cream opacity-50 mt-4 space-y-2">
+                    <div class="rotate-[15deg] ml-4">☆</div>
+                    <div class="rotate-[-10deg]">☆</div>
+                </div>
+                <p class="font-sans text-sm md:text-base font-light max-w-[200px] mt-8 text-cream/70">
+                    Eu te amo <span class="relative inline-block text-cream font-medium z-10">mais<span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] h-[140%] border border-wine/70 rounded-[50%] rotate-6 pointer-events-none"></span></span> do que consigo colocar em palavras.
+                </p>
+                <div class="font-hand text-4xl text-cream opacity-50 mt-10 ml-8 rotate-[25deg]">☆</div>
+            </div>
+
+            <!-- Centro - Foto e Mensagem Final -->
+            <div class="flex flex-col items-center justify-center mt-32 md:mt-0 max-w-4xl mx-auto w-full">
+                
+                <div class="polaroid rotate-[-3deg] w-[280px] md:w-[350px] mb-12 relative z-10">
+                    <div class="tape tape-top-center"></div>
+                    <div class="w-full aspect-[4/5] overflow-hidden">
+                        <!-- Corte 11 - Rosto focado -->
+                        <div class="img-source" style="background-position: 50% 95%; background-size: 200%;"></div>
+                    </div>
+                </div>
+
+                <div class="text-center md:absolute md:right-16 md:bottom-1/3">
+                    <h2 class="font-hand text-6xl md:text-8xl text-cream mb-4 rotate-[-5deg]">
+                        eu te amo.
+                    </h2>
+                    <div class="font-hand text-wine text-7xl md:text-9xl rotate-[10deg] animate-pulse">
+                        ♡
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Assinatura/Papel rasgado no rodape -->
+            <div class="absolute bottom-10 right-10 md:bottom-20 md:right-32 bg-cream text-charcoal px-6 py-3 shadow-lg rotate-[-2deg]">
+                <p class="font-hand text-2xl">hoje e sempre. ♡</p>
+                <div class="absolute -top-2 left-1/2 w-12 h-4 bg-amber-100/60 rotate-2 -translate-x-1/2 backdrop-blur-sm"></div>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>
